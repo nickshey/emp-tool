@@ -96,7 +96,7 @@ class NetIO: public IOChannel<NetIO> { public:
 		} else {
 			recv_data_internal(&tmp, 1);
 			send_data_internal(&tmp, 1);
-			cout << "bits:" << count << endl;
+			std::cout << "bits:" << count << std::endl;
 			flush();
 		}
 	}
