@@ -17,6 +17,8 @@ using std::string;
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+int count = 0;
+
 namespace emp {
 
 class NetIO: public IOChannel<NetIO> { public:
@@ -94,6 +96,7 @@ class NetIO: public IOChannel<NetIO> { public:
 		} else {
 			recv_data_internal(&tmp, 1);
 			send_data_internal(&tmp, 1);
+			cout << "bits:" << count << endl;
 			flush();
 		}
 	}
@@ -115,6 +118,7 @@ class NetIO: public IOChannel<NetIO> { public:
 	}
 
 	void flush() {
+		count += 1;
 		fflush(stream);
 	}
 
