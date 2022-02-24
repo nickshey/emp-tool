@@ -17,11 +17,11 @@ using std::string;
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-int count = 0;
-
 namespace emp {
 
 class NetIO: public IOChannel<NetIO> { public:
+	int sentbits = 0;
+	int receivedbits = 0;	
 	bool is_server;
 	int mysocket = -1;
 	int consocket = -1;
@@ -96,13 +96,14 @@ class NetIO: public IOChannel<NetIO> { public:
 		} else {
 			recv_data_internal(&tmp, 1);
 			send_data_internal(&tmp, 1);
-			std::cout << "bits:" << count << std::endl;
 			flush();
 		}
 	}
 
 	~NetIO(){
 		flush();
+		std::cout << "sent bits:" << sentbits << std::endl;
+		std::cout << "received bits:" << receivedbits << std::endl;
 		fclose(stream);
 		delete[] buffer;
 	}
@@ -118,7 +119,6 @@ class NetIO: public IOChannel<NetIO> { public:
 	}
 
 	void flush() {
-		count += 1;
 		fflush(stream);
 	}
 
@@ -132,6 +132,7 @@ class NetIO: public IOChannel<NetIO> { public:
 				fprintf(stderr,"error: net_send_data %d\n", res);
 		}
 		has_sent = true;
+		sentbits += len;
 	}
 
 	void recv_data_internal(void  * data, int len) {
@@ -146,6 +147,7 @@ class NetIO: public IOChannel<NetIO> { public:
 			else
 				fprintf(stderr,"error: net_send_data %d\n", res);
 		}
+		receivedbits += len;
 	}
 };
 
