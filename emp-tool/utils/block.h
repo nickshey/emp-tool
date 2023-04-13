@@ -8,10 +8,6 @@
 inline __m128i _mm_aesimc_si128(__m128i a) {
 	return vreinterpretq_m128i_u8(vaesimcq_u8(vreinterpretq_u8_m128i(a)));
 }
-inline __m128i _mm_aesdec_si128 (__m128i a, __m128i RoundKey)
-{
-    return vreinterpretq_m128i_u8(vaesimcq_u8(vaesdq_u8(vreinterpretq_u8_m128i(a), vdupq_n_u8(0)) ^ vreinterpretq_u8_m128i(RoundKey)));
-}
 
 inline __m128i _mm_aesdeclast_si128 (__m128i a, __m128i RoundKey)
 {
@@ -70,7 +66,7 @@ inline std::ostream& operator<<(std::ostream& out, const block& blk) {
 	out << std::hex;
 	uint64_t* data = (uint64_t*)&blk;
 
-	out << std::setw(16) << std::setfill('0') << data[1]
+	out << std::setw(16) << std::setfill('0') << data[1] <<" "
 		<< std::setw(16) << std::setfill('0') << data[0];
 
 	out << std::dec << std::setw(0);
@@ -125,7 +121,7 @@ inline void sse_trans(uint8_t *out, uint8_t const *inp, uint64_t nrows,
   assert(nrows % 8 == 0 && ncols % 8 == 0);
 
   // Do the main body in 16x8 blocks:
-  for (rr = 0; rr <= nrows - 16; rr += 16) {
+  for (rr = 0; rr + 16 <= nrows; rr += 16) {
     for (cc = 0; cc < ncols; cc += 8) {
       vec = _mm_set_epi8(INP(rr + 15, cc), INP(rr + 14, cc), INP(rr + 13, cc),
                          INP(rr + 12, cc), INP(rr + 11, cc), INP(rr + 10, cc),
@@ -146,7 +142,7 @@ inline void sse_trans(uint8_t *out, uint8_t const *inp, uint64_t nrows,
       (nrows % 8 == 0 && nrows % 16 != 0)) {
     // The fancy optimizations in the else-branch don't work if the above if-condition
     // holds, so we use the simpler non-simd variant for that case.
-    for (cc = 0; cc <= ncols - 16; cc += 16) {
+    for (cc = 0; cc + 16 <= ncols; cc += 16) {
       for (i = 0; i < 8; ++i) {
         tmp.b[i] = h = *(uint16_t const *)&INP(rr + i, cc);
         tmp.b[i + 8] = h >> 8;
@@ -157,7 +153,7 @@ inline void sse_trans(uint8_t *out, uint8_t const *inp, uint64_t nrows,
       }
     }
   } else {
-    for (cc = 0; cc <= ncols - 16; cc += 16) {
+    for (cc = 0; cc + 16 <= ncols; cc += 16) {
       vec = _mm_set_epi16(*(uint16_t const *)&INP(rr + 7, cc),
                           *(uint16_t const *)&INP(rr + 6, cc),
                           *(uint16_t const *)&INP(rr + 5, cc),
